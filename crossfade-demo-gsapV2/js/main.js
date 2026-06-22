@@ -7,10 +7,16 @@
 
   const AXIS_COUNT = 4;
   const SECTION_HEIGHT = '620vh';
-  const HERO_END = 0.13;
-  const MORPH_END = 0.40;
-  const MORPH_DUR = MORPH_END - HERO_END;
-  const CROSS_DUR = 1 - MORPH_END;
+
+  const PHASE = {
+    HERO_END: 0.13,
+    MORPH_END: 0.40,
+  };
+
+  const DURATION = {
+    MORPH: PHASE.MORPH_END - PHASE.HERO_END,
+    CROSS: 1 - PHASE.MORPH_END,
+  };
 
   const COPY = { STEP: 0.8, SPREAD: 1.5, OFFSET: 0.12 };
 
@@ -113,14 +119,9 @@
   }
 
   function syncMorphHighlight(scrollProgress) {
-    const local = (scrollProgress - HERO_END) / MORPH_DUR;
+    const local = (scrollProgress - PHASE.HERO_END) / DURATION.MORPH;
     if (local < 0.65) clearAxisHighlight();
-    else {
-      axisCircles.forEach((circle, i) => {
-        circle.classList.toggle('act', i === 0);
-        circle.classList.toggle('dim', i !== 0);
-      });
-    }
+    else setAxisHighlight(0);
   }
 
   function syncCrossVisuals() {
@@ -142,10 +143,10 @@
   }
 
   // ---------------------------------------------------------------------------
-  // GSAP timeline (Hero hold + Morph scrub + Cross scrub)
+  // GSAP timeline
   // ---------------------------------------------------------------------------
 
-  function buildTimeline() {
+  function setInitialStyles() {
     gsap.set(titleEl, { xPercent: -50, opacity: 1, y: 0 });
     gsap.set(introCopyEl, { yPercent: -50, opacity: 1, y: 0 });
     gsap.set(scrollCueEl, { opacity: 1 });
@@ -154,6 +155,88 @@
     gsap.set(axisNumbers, { opacity: 0 });
     gsap.set(slideCopies, { opacity: 0, visibility: 'hidden', yPercent: -50, y: 0 });
     gsap.set(backgrounds, { opacity: 0 });
+  }
+
+  function addHeroPhase(tl) {
+    tl.to({}, { duration: PHASE.HERO_END });
+  }
+
+  function addMorphPhase(tl) {
+    tl.addLabel('morph', PHASE.HERO_END);
+
+    tl.to(
+      [titleEl, introCopyEl, scrollCueEl],
+      { opacity: 0, y: -20, duration: 0.1, ease: 'power2.in' },
+      'morph',
+    );
+
+    tl.to(
+      diagramEl,
+      {
+        x: () => geometry.deltaX,
+        y: () => geometry.deltaY,
+        scale: () => geometry.scale,
+        yPercent: -50,
+        duration: DURATION.MORPH,
+        ease: 'power2.inOut',
+        onStart: () => {
+          stage.dataset.phase = 'morph';
+        },
+      },
+      'morph',
+    );
+
+    tl.to(axisLabels, { opacity: 0, duration: 0.12, ease: 'power1.in' }, 'morph+=0.04');
+    tl.to(axisNumbers, { opacity: 1, duration: 0.12, ease: 'power1.out' }, 'morph+=0.10');
+
+    tl.to(
+      backgrounds[0],
+      {
+        opacity: 1,
+        duration: 0.14,
+        ease: 'power2.out',
+        onStart: () => {
+          backgrounds[0].style.transition = 'none';
+        },
+      },
+      'morph+=0.08',
+    );
+
+    tl.to(
+      slideCopies[0],
+      { opacity: 1, visibility: 'visible', duration: 0.08, ease: 'power1.out' },
+      'morph+=0.18',
+    );
+  }
+
+  function prepareCrossPhase() {
+    stage.dataset.phase = 'cross';
+    backgrounds.forEach((bg) => {
+      bg.style.opacity = '';
+      bg.style.transition = '';
+    });
+    gsap.set(axisLabels, { opacity: 0 });
+    gsap.set(axisNumbers, { opacity: 1 });
+  }
+
+  function addCrossPhase(tl) {
+    tl.addLabel('cross', PHASE.MORPH_END);
+
+    tl.to(
+      cross,
+      {
+        axis: AXIS_COUNT - 1,
+        duration: DURATION.CROSS,
+        ease: 'none',
+        onStart: prepareCrossPhase,
+        onUpdate: syncCrossVisuals,
+      },
+      'cross',
+    );
+  }
+
+  function buildTimeline() {
+    setInitialStyles();
 
     const tl = gsap.timeline({
       scrollTrigger: {
@@ -164,76 +247,31 @@
         invalidateOnRefresh: true,
         onUpdate(self) {
           const progress = self.progress;
-          if (progress <= HERO_END) setHeroPhase();
-          else if (progress < MORPH_END) syncMorphHighlight(progress);
+          if (progress <= PHASE.HERO_END) setHeroPhase();
+          else if (progress < PHASE.MORPH_END) syncMorphHighlight(progress);
         },
       },
     });
 
-    // Hero — hold initial layout
-    tl.to({}, { duration: HERO_END });
-
-    // Morph — diagram move, hero fade-out, axis 1 reveal
-    tl.addLabel('morph', HERO_END);
-    tl.to(
-      [titleEl, introCopyEl, scrollCueEl],
-      { opacity: 0, y: -20, duration: 0.1, ease: 'power2.in' },
-      'morph',
-    );
-    tl.to(
-      diagramEl,
-      {
-        x: () => geometry.deltaX,
-        y: () => geometry.deltaY,
-        scale: () => geometry.scale,
-        yPercent: -50,
-        duration: MORPH_DUR,
-        ease: 'power2.inOut',
-        onStart: () => { stage.dataset.phase = 'morph'; },
-      },
-      'morph',
-    );
-    tl.to(axisLabels, { opacity: 0, duration: 0.12, ease: 'power1.in' }, 'morph+=0.04');
-    tl.to(axisNumbers, { opacity: 1, duration: 0.12, ease: 'power1.out' }, 'morph+=0.10');
-    tl.to(
-      backgrounds[0],
-      {
-        opacity: 1,
-        duration: 0.14,
-        ease: 'power2.out',
-        onStart: () => { backgrounds[0].style.transition = 'none'; },
-      },
-      'morph+=0.08',
-    );
-    tl.to(
-      slideCopies[0],
-      { opacity: 1, visibility: 'visible', duration: 0.08, ease: 'power1.out' },
-      'morph+=0.18',
-    );
-
-    // Cross — scrub axis index; backgrounds & copies follow via onUpdate
-    tl.addLabel('cross', MORPH_END);
-    tl.to(
-      cross,
-      {
-        axis: AXIS_COUNT - 1,
-        duration: CROSS_DUR,
-        ease: 'none',
-        onStart: () => {
-          stage.dataset.phase = 'cross';
-          backgrounds.forEach((bg) => {
-            bg.style.opacity = '';
-            bg.style.transition = '';
-          });
-          gsap.set(axisLabels, { opacity: 0 });
-          gsap.set(axisNumbers, { opacity: 1 });
-        },
-        onUpdate: syncCrossVisuals,
-      },
-      'cross',
-    );
+    addHeroPhase(tl);
+    addMorphPhase(tl);
+    addCrossPhase(tl);
 
     return tl;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Controls
+  // ---------------------------------------------------------------------------
+
+  function handlePatternChange(event) {
+    const button = event.target.closest('button');
+    if (!button) return;
+
+    stage.dataset.pattern = button.dataset.p;
+    patternCtrl.querySelectorAll('button').forEach((btn) => {
+      btn.classList.toggle('act', btn === button);
+    });
   }
 
   // ---------------------------------------------------------------------------
@@ -250,14 +288,7 @@
     timeline?.kill();
     timeline = buildTimeline();
 
-    patternCtrl.addEventListener('click', (event) => {
-      const button = event.target.closest('button');
-      if (!button) return;
-      stage.dataset.pattern = button.dataset.p;
-      patternCtrl.querySelectorAll('button').forEach((btn) => {
-        btn.classList.toggle('act', btn === button);
-      });
-    });
+    patternCtrl.addEventListener('click', handlePatternChange);
   }
 
   init();
