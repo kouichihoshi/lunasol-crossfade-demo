@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>4D Beige ｜ クロスフェード演出サンプル（GSAP）</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <div class="ctrl" id="ctrl">
+    <span>切替</span>
+    <button data-p="fade" class="act">クロスフェード</button>
+    <button data-p="blur">ブラー溶け</button>
+    <button data-p="zoom">ズーム</button>
+  </div>
+
+  <section class="xsection" id="section">
+    <div class="stage" id="stage" data-pattern="fade" data-phase="hero">
+
+      <div class="bg" style="background-image:url(&quot;assets/images/bg-1.jpg&quot;)" data-theme="dark"></div>
+      <div class="bg" style="background-image:url(&quot;assets/images/bg-2.jpg&quot;)" data-theme="dark"></div>
+      <div class="bg" style="background-image:url(&quot;assets/images/bg-3.jpg&quot;)" data-theme="dark"></div>
+      <div class="bg" style="background-image:url(&quot;assets/images/bg-4.jpg&quot;)" data-theme="dark"></div>
+
+      <!-- hero formula -->
+      <div class="hero" id="hero">
+        <h2 class="htitle" id="htitle">The Formula of LUNASOL Beige</h2>
+        <div class="hdiagram" id="hdiagram">
+          <div class="hlines" id="hlines"></div>
+          <div class="hcircle" data-n="1"><div class="htx"><span class="l1">粉の気配を</span><span class="l2"><b>消</b>すように</span></div><div class="hnum">1</div></div>
+          <div class="hcircle" data-n="2"><div class="htx"><span class="l1">なめらかな</span><span class="l2"><b>面</b>のツヤめき</span></div><div class="hnum">2</div></div>
+          <div class="hcircle" data-n="3"><div class="htx"><span class="l1">途切れずに</span><span class="l2"><b>連</b>なる光</span></div><div class="hnum">3</div></div>
+          <div class="hcircle" data-n="4"><div class="htx"><span class="l1">影さえも、</span><span class="l2"><b>透</b>明に</span></div><div class="hnum">4</div></div>
+          <div class="hcenter"><span class="d4">4D</span><span class="bw">Beige</span></div>
+        </div>
+        <div class="hcopy" id="hcopy">
+          <h3>4つの軸で<br>Designされたベージュ</h3>
+          <p>ルナソルが追求してきた、4つのこだわり。<br>ルナソルのフィロソフィーを、技術の積み重ねによって<br>“どう美しく見えるか”まで設計したものが、4D Beige です。</p>
+        </div>
+        <div class="hcue" id="hcue"><span>SCROLL</span><div class="bar"></div></div>
+      </div>
+
+      <!-- copy slides -->
+      <div class="copy">
+        <div class="slidecopy" data-i="0">
+          <h2 class="t">粉の気配を打ち消して</h2>
+          <p class="s">存在を感じさせない、極限の融合</p>
+          <p class="b">濡れツヤを放つ、光を内包した粉体を使用。<br>少ない量でも理想のメイク効果を発揮できるベストバランスを追求し、粉の気配を感じさせない仕上がりに。</p>
+        </div>
+        <div class="slidecopy" data-i="1">
+          <h2 class="t">なめらかな面の艶めき</h2>
+          <p class="s">点ではなく面で捉える、立体的な輝き</p>
+          <p class="b">肌の凹凸を整えてスムースな土台をつくるから、パールが乱れなく均一にフィット。頬やまぶたに“面”のツヤをもたらして、あなた自身が発光しているかのように。</p>
+        </div>
+        <div class="slidecopy" data-i="2">
+          <h2 class="t">途切れずに連なる光</h2>
+          <p class="s">時間とともに変化する、連続する美しさ</p>
+          <p class="b">点在する光の間を粒度の異なるパールで埋めて、“サイズ感のグラデーション”を実現。繊細な光から輝度の高い光までがなめらかに繋がり、表情の動きに合わせて美しくツヤが巡るはず。</p>
+        </div>
+        <div class="slidecopy" data-i="3">
+          <h2 class="t">影さえも、透明に</h2>
+          <p class="s">陰影を重くせず、奥行きを際立たせる</p>
+          <p class="b">黒に頼りすぎず、重さや濁りを感じさせない影色を設計。影を視認させない肌に溶け込むような粉づきにもこだわり、光を引き立てる“透け影”を紡ぎだす。</p>
+        </div>
+      </div>
+
+      <div class="pcount"><span id="cur">01</span> / 04</div>
+    </div>
+  </section>
+
+  <section class="outro">
+    <div class="kick">Layered into one</div>
+    <h2>4つの軸が重なり、<br>ひとつの“4D Beige”になる。</h2>
+    <p>それぞれが呼応し合うことで、4D Beige の美しさは、より深く広がっていきます。</p>
+    <a href="#">← 重ねるスタック版のサンプルを見る</a>
+  </section>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script src="js/main.js"></script>
+
+
+</body></html>
